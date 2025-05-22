@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- 时钟外圈 -->
+  <circle cx="50" cy="50" r="45" fill="#4285F4" stroke="#3367D6" stroke-width="5" />
+  
+  <!-- 时钟中心点 -->
+  <circle cx="50" cy="50" r="5" fill="white" />
+  
+  <!-- 时针 (指向2点钟方向) -->
+  <line x1="50" y1="50" x2="75" y2="65" stroke="white" stroke-width="6" stroke-linecap="round" />
+  
+  <!-- 分针 (指向10点钟方向) -->
+  <line x1="50" y1="50" x2="25" y2="25" stroke="white" stroke-width="4" stroke-linecap="round" />
+</svg> 

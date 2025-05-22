@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>多重倒计时器</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>多重倒计时器</h1>
+    
+    <div class="timers-container" id="timers-container">
+      <!-- 倒计时列表将在这里动态生成 -->
+    </div>
+    
+    <div class="controls">
+      <div class="add-timer">
+        <input type="number" id="minutes-input" min="1" max="999" placeholder="分钟">
+        <button id="add-timer-btn">添加倒计时</button>
+      </div>
+      
+      <div class="schedule-controls">
+        <h2>定时控制</h2>
+        <div class="schedule-row">
+          <label for="start-time">开始时间：</label>
+          <input type="time" id="start-time">
+        </div>
+        <div class="schedule-row">
+          <label for="stop-time">停止时间：</label>
+          <input type="time" id="stop-time">
+        </div>
+        <button id="save-schedule-btn">保存定时设置</button>
+      </div>
+      
+      <div class="timer-controls">
+        <button id="start-all-btn">开始所有倒计时</button>
+        <button id="stop-all-btn">停止所有倒计时</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html> 

@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "北京时间显示",
+  "version": "1.0",
+  "description": "显示准确的北京时间，图标上实时更新",
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "https://f.m.suning.com/*"
+  ]
+} 

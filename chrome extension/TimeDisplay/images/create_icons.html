@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>创建时钟图标</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 10px;
+    }
+    .instructions {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>时钟图标生成器</h1>
+  
+  <div>
+    <canvas id="icon16" width="16" height="16"></canvas>
+    <canvas id="icon48" width="48" height="48"></canvas>
+    <canvas id="icon128" width="128" height="128"></canvas>
+  </div>
+  
+  <div class="instructions">
+    <h2>使用说明：</h2>
+    <p>1. 此页面会自动生成三种尺寸的时钟图标</p>
+    <p>2. 右键点击每个图标并选择"图片另存为..."</p>
+    <p>3. 将图标分别保存为 icon16.png, icon48.png 和 icon128.png</p>
+    <p>4. 将这些图标放在 images 文件夹中</p>
+  </div>
+  
+  <script>
+    // 绘制时钟图标的函数
+    function drawClockIcon(canvasId, size) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      
+      // 清除画布
+      ctx.clearRect(0, 0, size, size);
+      
+      // 绘制圆形背景
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/2 - 1, 0, 2 * Math.PI);
+      ctx.fillStyle = '#4285F4'; // Google 蓝色
+      ctx.fill();
+      ctx.strokeStyle = '#3367D6';
+      ctx.lineWidth = size/16;
+      ctx.stroke();
+      
+      // 绘制时钟中心点
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size/16, 0, 2 * Math.PI);
+      ctx.fillStyle = 'white';
+      ctx.fill();
+      
+      // 绘制时针和分针
+      // 时针 (指向2点钟方向)
+      ctx.beginPath();
+      ctx.moveTo(size/2, size/2);
+      ctx.lineTo(size/2 + size/3 * Math.cos(Math.PI/3), size/2 + size/3 * Math.sin(Math.PI/3));
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = size/12;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+      
+      // 分针 (指向10点钟方向)
+      ctx.beginPath();
+      ctx.moveTo(size/2, size/2);
+      ctx.lineTo(size/2 + size/2.5 * Math.cos(Math.PI*5/3), size/2 + size/2.5 * Math.sin(Math.PI*5/3));
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = size/16;
+      ctx.lineCap = 'round';
+      ctx.stroke();
+    }
+    
+    // 绘制三种尺寸的图标
+    drawClockIcon('icon16', 16);
+    drawClockIcon('icon48', 48);
+    drawClockIcon('icon128', 128);
+  </script>
+</body>
+</html> 

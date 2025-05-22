@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>生成数字图标</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      text-align: center;
+    }
+    
+    .instructions {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+      text-align: left;
+    }
+    
+    .preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .number-preview {
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .icon-preview {
+      margin-bottom: 5px;
+    }
+    
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 20px;
+    }
+    
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>数字图标生成器</h1>
+  
+  <div class="instructions">
+    <h2>使用说明</h2>
+    <p>这个工具将生成倒计时器所需的数字图标（0-59）。每个数字将以白色显示在灰色背景上。点击生成按钮，系统将为您创建所有图标并提供下载。</p>
+    <p>请将下载的图标放置在扩展的 <code>/images/numbers/</code> 目录中。</p>
+  </div>
+  
+  <div class="preview-container" id="preview-container">
+    <!-- 预览将在这里显示 -->
+  </div>
+  
+  <button id="generate-btn">生成所有数字图标</button>
+  
+  <script>
+    // 在页面加载时创建预览
+    document.addEventListener('DOMContentLoaded', function() {
+      const previewContainer = document.getElementById('preview-container');
+      
+      // 创建0-9的预览
+      for (let i = 0; i < 10; i++) {
+        createNumberPreview(i, previewContainer);
+      }
+    });
+    
+    // 创建数字预览
+    function createNumberPreview(number, container) {
+      const previewDiv = document.createElement('div');
+      previewDiv.className = 'number-preview';
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = 48;
+      canvas.height = 48;
+      canvas.className = 'icon-preview';
+      
+      const ctx = canvas.getContext('2d');
+      
+      // 绘制背景
+      ctx.fillStyle = '#888888';
+      ctx.fillRect(0, 0, 48, 48);
+      
+      // 绘制数字
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 32px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(number.toString(), 24, 24);
+      
+      const label = document.createElement('span');
+      label.textContent = number;
+      
+      previewDiv.appendChild(canvas);
+      previewDiv.appendChild(label);
+      container.appendChild(previewDiv);
+    }
+    
+    // 生成按钮点击事件
+    document.getElementById('generate-btn').addEventListener('click', function() {
+      // 创建一个zip文件来存储所有图片
+      generateAllNumberIcons();
+    });
+    
+    // 生成所有数字图标
+    function generateAllNumberIcons() {
+      // 为0-59的每个数字创建图标
+      for (let i = 0; i <= 59; i++) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 128;
+        
+        const ctx = canvas.getContext('2d');
+        
+        // 绘制背景
+        ctx.fillStyle = '#888888';
+        ctx.fillRect(0, 0, 128, 128);
+        
+        // 绘制数字
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = 'bold 80px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(i.toString(), 64, 64);
+        
+        // 转换为图片并下载
+        const link = document.createElement('a');
+        link.download = `${i}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }
+      
+      alert('所有图标已生成！请将它们放在扩展的/images/numbers/目录中。');
+    }
+  </script>
+</body>
+</html> 

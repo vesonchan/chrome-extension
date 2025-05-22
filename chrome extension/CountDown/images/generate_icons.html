@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>生成倒计时图标</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 10px;
+    }
+    .instructions {
+      background-color: #f5f5f5;
+      padding: 15px;
+      border-radius: 5px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 15px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>倒计时图标生成器</h1>
+  
+  <div class="instructions">
+    <h3>使用说明</h3>
+    <p>这个页面将帮助你生成Chrome扩展需要的各种尺寸的图标。点击生成按钮后，右键点击每个图标并选择"图片另存为"，将它们保存到images文件夹中。</p>
+    <p>需要保存的文件名：</p>
+    <ul>
+      <li>icon16.png (16x16)</li>
+      <li>icon48.png (48x48)</li>
+      <li>icon128.png (128x128)</li>
+    </ul>
+  </div>
+  
+  <div>
+    <h3>16x16 图标</h3>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <br>
+    <button onclick="downloadIcon(16)">下载 icon16.png</button>
+  </div>
+  
+  <div>
+    <h3>48x48 图标</h3>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <br>
+    <button onclick="downloadIcon(48)">下载 icon48.png</button>
+  </div>
+  
+  <div>
+    <h3>128x128 图标</h3>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+    <br>
+    <button onclick="downloadIcon(128)">下载 icon128.png</button>
+  </div>
+  
+  <script>
+    // 生成图标的函数
+    function generateIcon(size) {
+      const canvas = document.getElementById(`canvas${size}`);
+      const ctx = canvas.getContext('2d');
+      
+      // 设置背景
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, size, size);
+      
+      // 绘制圆形背景
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, size*0.45, 0, Math.PI*2);
+      ctx.fillStyle = '#888888';
+      ctx.fill();
+      
+      // 绘制时钟指针
+      const centerX = size/2;
+      const centerY = size/2;
+      const radius = size * 0.4;
+      
+      // 绘制分针
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX + radius * Math.sin(Math.PI / 3),
+        centerY - radius * Math.cos(Math.PI / 3)
+      );
+      ctx.lineWidth = size * 0.05;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      
+      // 绘制时针
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(
+        centerX - radius * 0.6 * Math.sin(Math.PI / 6),
+        centerY + radius * 0.6 * Math.cos(Math.PI / 6)
+      );
+      ctx.lineWidth = size * 0.05;
+      ctx.strokeStyle = '#ffffff';
+      ctx.stroke();
+      
+      // 绘制中心点
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, size*0.06, 0, Math.PI*2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
+    }
+    
+    // 下载图标的函数
+    function downloadIcon(size) {
+      const canvas = document.getElementById(`canvas${size}`);
+      const link = document.createElement('a');
+      link.download = `icon${size}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+    
+    // 页面加载时生成所有图标
+    window.onload = function() {
+      generateIcon(16);
+      generateIcon(48);
+      generateIcon(128);
+    };
+  </script>
+</body>
+</html> 
