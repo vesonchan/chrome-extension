@@ -1,5 +1,10 @@
 // 初始化扩展
-chrome.runtime.onInstalled.addListener(function() {
+chrome.runtime.onInstalled.addListener(function(details) {
+  console.log('🚀 扩展安装/更新，原因:', details.reason);
+  
+  // 清除所有现有的alarms
+  chrome.alarms.clearAll();
+  
   // 初始化存储
   chrome.storage.local.set({
     timers: [],
@@ -183,14 +188,57 @@ function updateBadgeText() {
 
 // 显示计时器完成通知
 function showTimerCompletedNotification(minutes) {
-  chrome.notifications.create({
-    type: 'basic',
-    iconUrl: 'images/icon128.png',
-    title: '计时器完成',
-    message: `${minutes}分钟的倒计时已完成！`,
-    priority: 2
-  });
+  // 首先检查通知权限
+  if (!chrome.notifications) {
+    console.error('Notifications API not available');
+    return;
+  }
+  
+  // 创建通知ID以便追踪
+  const notificationId = `timer-${Date.now()}`;
+  
+  try {
+    chrome.notifications.create(notificationId, {
+      type: 'basic',
+      iconUrl: 'images/icon128.png',
+      title: '⏰ 计时器完成',
+      message: `${minutes}分钟的倒计时已完成！点击查看`,
+      priority: 2,
+      requireInteraction: true, // 要求用户交互才能关闭
+      silent: false // 确保有声音提示
+    }, function(createdNotificationId) {
+      if (chrome.runtime.lastError) {
+        console.error('创建通知失败:', chrome.runtime.lastError.message);
+        // 降级为浏览器原生alert（作为备选方案）
+        try {
+          // 发送消息给活动标签页显示alert
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            if (tabs.length > 0) {
+              chrome.tabs.sendMessage(tabs[0].id, {
+                action: 'showAlert',
+                message: `⏰ ${minutes}分钟的倒计时已完成！`
+              });
+            }
+          });
+        } catch (e) {
+          console.error('备选通知方案也失败:', e);
+        }
+      } else {
+        console.log('通知创建成功:', createdNotificationId);
+      }
+    });
+  } catch (error) {
+    console.error('通知创建异常:', error);
+  }
 }
+
+// 处理通知点击事件
+chrome.notifications.onClicked.addListener(function(notificationId) {
+  // 点击通知时打开扩展弹窗
+  chrome.action.openPopup();
+  // 关闭通知
+  chrome.notifications.clear(notificationId);
+});
 
 // 监听消息
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
@@ -201,12 +249,35 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   } else if (message.action === 'updateSchedule') {
     // 当定时设置更新时，记录日志
     console.log('定时设置已更新，重新检查定时');
-    checkSchedule(); // 立即检查一次
+    
+    // 检查是否设置了开始时间，如果设置了并且当前正在运行，需要先停止
+    chrome.storage.local.get(['scheduleSettings', 'isRunning'], function(result) {
+      const scheduleSettings = result.scheduleSettings || {};
+      const isRunning = result.isRunning || false;
+      
+      if (scheduleSettings.startTime && isRunning) {
+        console.log('检测到设置了开始时间且当前正在运行，将在开始时间启动，现在先停止当前运行的倒计时');
+        stopAllTimers();
+      }
+      
+      // 立即检查一次定时设置
+      checkSchedule();
+    });
+  } else if (message.action === 'testScheduleCheck') {
+    // 测试定时检查功能
+    console.log('🧪 手动触发定时检查测试');
+    checkSchedule();
+    sendResponse({ success: true });
+    return true; // 保持消息通道开放
   }
 });
 
 // 定期检查计时器状态，确保在重启浏览器后能够继续运行
 chrome.runtime.onStartup.addListener(function() {
+  console.log('🔄 浏览器启动，重新初始化扩展');
+  // 启动定时检查器
+  startScheduleChecker();
+  
   chrome.storage.local.get(['isRunning'], function(result) {
     if (result.isRunning) {
       startAllTimers();
@@ -214,43 +285,113 @@ chrome.runtime.onStartup.addListener(function() {
   });
 });
 
+
+
 // 定时检查器 - 检查是否到了开始或停止时间
 function startScheduleChecker() {
-  // 每分钟检查一次
-  setInterval(checkSchedule, 60 * 1000);
+  // 创建Chrome Alarms以确保定时检查的可靠性
+  chrome.alarms.create('scheduleChecker', {
+    delayInMinutes: 0, // 立即开始
+    periodInMinutes: 0.0167 // 每秒检查一次（1/60分钟）
+  });
+  
   // 立即检查一次
   checkSchedule();
 }
 
+// 监听Alarms事件
+chrome.alarms.onAlarm.addListener(function(alarm) {
+  if (alarm.name === 'scheduleChecker') {
+    checkSchedule();
+  }
+});
+
+// 时间匹配函数 - 支持HH:MM和HH:MM:SS格式比较
+function isTimeMatch(setTime, currentTime) {
+  if (!setTime || !currentTime) return false;
+  
+  // 如果设置的时间是HH:MM格式，只比较小时和分钟
+  if (setTime.length === 5 && setTime.includes(':')) {
+    // 设置时间格式：HH:MM，当前时间格式：HH:MM:SS
+    const currentHM = currentTime.substring(0, 5); // 取前5位 HH:MM
+    return setTime === currentHM;
+  }
+  
+  // 如果设置的时间是HH:MM:SS格式，精确比较
+  if (setTime.length === 8 && setTime.split(':').length === 3) {
+    return setTime === currentTime;
+  }
+  
+  return false;
+}
+
 // 检查定时设置
 function checkSchedule() {
-  chrome.storage.local.get(['scheduleSettings', 'isRunning'], function(result) {
+  chrome.storage.local.get(['scheduleSettings', 'isRunning', 'timers'], function(result) {
     const scheduleSettings = result.scheduleSettings || {};
     const isRunning = result.isRunning || false;
+    const timers = result.timers || [];
     
     // 如果没有设置，则不执行任何操作
     if (!scheduleSettings.startTime && !scheduleSettings.stopTime) {
       return;
     }
     
-    // 获取当前时间
+    // 获取当前时间（精确到秒）
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
-    const currentTimeString = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+    const currentSeconds = now.getSeconds();
+    const currentTimeString = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}:${currentSeconds.toString().padStart(2, '0')}`;
     
-    console.log('定时检查 - 当前时间:', currentTimeString);
-    
-    // 检查是否到了开始时间
-    if (scheduleSettings.startTime && scheduleSettings.startTime === currentTimeString && !isRunning) {
-      console.log('到达开始时间，启动倒计时');
-      startAllTimers();
+    // 增加更详细的日志（每10秒记录一次，避免日志过多）
+    if (currentSeconds % 10 === 0) {
+      console.log('🕐 定时检查详情:');
+      console.log('- 当前时间:', currentTimeString);
+      console.log('- 设置开始时间:', scheduleSettings.startTime);
+      console.log('- 设置停止时间:', scheduleSettings.stopTime);
+      console.log('- 运行状态:', isRunning);
+      console.log('- 倒计时器数量:', timers.length);
     }
     
-    // 检查是否到了停止时间
-    if (scheduleSettings.stopTime && scheduleSettings.stopTime === currentTimeString && isRunning) {
-      console.log('到达停止时间，停止倒计时');
+    // 检查是否到了开始时间（支持HH:MM和HH:MM:SS格式）
+    if (scheduleSettings.startTime && isTimeMatch(scheduleSettings.startTime, currentTimeString) && !isRunning) {
+      console.log('🚀 到达开始时间，准备启动倒计时!');
+      // 确保有倒计时器存在才启动
+      if (timers.length > 0) {
+        console.log('✅ 启动所有倒计时器');
+        startAllTimers();
+        
+        // 发送通知告知用户已自动开始
+        if (chrome.notifications) {
+          chrome.notifications.create(`auto-start-${Date.now()}`, {
+            type: 'basic',
+            iconUrl: 'images/icon128.png',
+            title: '⏰ 定时启动',
+            message: `倒计时已按计划在 ${scheduleSettings.startTime} 自动开始！`,
+            priority: 1
+          });
+        }
+      } else {
+        console.log('❌ 没有倒计时器，无法启动');
+      }
+    }
+    
+    // 检查是否到了停止时间（支持HH:MM和HH:MM:SS格式）
+    if (scheduleSettings.stopTime && isTimeMatch(scheduleSettings.stopTime, currentTimeString) && isRunning) {
+      console.log('🛑 到达停止时间，停止倒计时');
       stopAllTimers();
+      
+      // 发送通知告知用户已自动停止
+      if (chrome.notifications) {
+        chrome.notifications.create(`auto-stop-${Date.now()}`, {
+          type: 'basic',
+          iconUrl: 'images/icon128.png',
+          title: '⏹️ 定时停止',
+          message: `倒计时已按计划在 ${scheduleSettings.stopTime} 自动停止！`,
+          priority: 1
+        });
+      }
     }
   });
 } 

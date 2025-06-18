@@ -10,12 +10,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const startTimeInput = document.getElementById('start-time');
   const stopTimeInput = document.getElementById('stop-time');
   const saveScheduleBtn = document.getElementById('save-schedule-btn');
+  const testScheduleBtn = document.getElementById('test-schedule-btn');
+  const settingsBtn = document.getElementById('settings-btn');
+  const scheduleStatus = document.getElementById('schedule-status');
   
   // 初始化加载保存的计时器
   loadTimers();
   
   // 加载定时设置
   loadSchedule();
+  
+  // 启动实时时间更新
+  startRealTimeUpdate();
   
   // 添加计时器按钮点击事件
   addTimerBtn.addEventListener('click', function() {
@@ -53,20 +59,93 @@ document.addEventListener('DOMContentLoaded', function() {
         stopTime: stopTime
       }
     }, function() {
+      // 如果设置了开始时间，先停止当前运行的倒计时
+      if (startTime) {
+        chrome.runtime.sendMessage({ action: 'stopAllTimers' });
+        window.console.log('定时开始时间已设置，当前倒计时已停止，将在指定时间自动开始');
+      }
+      
       // 发送消息给后台更新定时器
       chrome.runtime.sendMessage({ action: 'updateSchedule' });
-      alert('定时设置已保存！');
+      
+      let message = '定时设置已保存！';
+      if (startTime) {
+        message += `\n当前倒计时已停止，将在 ${startTime} 自动开始。`;
+      }
+      alert(message);
+      
+      // 更新UI显示
+      updateTimersUI();
+      
+      // 重新加载定时设置以更新状态显示
+      setTimeout(() => {
+        loadSchedule();
+      }, 100);
     });
+  });
+  
+  // 测试定时检查按钮点击事件
+  testScheduleBtn.addEventListener('click', function() {
+    chrome.runtime.sendMessage({ action: 'testScheduleCheck' }, function(response) {
+      if (response && response.success) {
+        alert('✅ 定时检查已执行，请查看控制台日志了解详情');
+      } else {
+        alert('❌ 定时检查执行失败');
+      }
+    });
+  });
+  
+  // 设置按钮点击事件
+  settingsBtn.addEventListener('click', function() {
+    chrome.runtime.openOptionsPage();
   });
   
   // 从存储中加载定时设置
   function loadSchedule() {
-    chrome.storage.local.get(['scheduleSettings'], function(result) {
+    chrome.storage.local.get(['scheduleSettings', 'isRunning'], function(result) {
       if (result.scheduleSettings) {
         startTimeInput.value = result.scheduleSettings.startTime || '';
         stopTimeInput.value = result.scheduleSettings.stopTime || '';
       }
+      
+      // 更新状态显示
+      updateScheduleStatus(result.scheduleSettings || {}, result.isRunning || false);
     });
+  }
+  
+  // 更新定时状态显示
+  function updateScheduleStatus(scheduleSettings, isRunning) {
+    const now = new Date();
+    const currentTime = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}`;
+    
+    if (!scheduleSettings.startTime && !scheduleSettings.stopTime) {
+      scheduleStatus.innerHTML = '';
+      scheduleStatus.className = 'schedule-status';
+      return;
+    }
+    
+    let statusText = '';
+    let statusClass = 'schedule-status';
+    
+    if (scheduleSettings.startTime) {
+      if (isRunning) {
+        statusText = `✅ 倒计时运行中（当前时间: ${currentTime}）`;
+        statusClass += ' running';
+      } else {
+        statusText = `⏰ 等待开始时间: ${scheduleSettings.startTime}（当前时间: ${currentTime}）`;
+        statusClass += ' waiting';
+      }
+    } else if (isRunning) {
+      statusText = `✅ 倒计时运行中（当前时间: ${currentTime}）`;
+      statusClass += ' running';
+    }
+    
+    if (scheduleSettings.stopTime) {
+      statusText += `\n🛑 停止时间: ${scheduleSettings.stopTime}`;
+    }
+    
+    scheduleStatus.textContent = statusText;
+    scheduleStatus.className = statusClass;
   }
   
   // 从存储中加载计时器
@@ -162,9 +241,22 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
+  // 启动实时时间更新
+  function startRealTimeUpdate() {
+    // 每秒更新一次定时状态显示
+    setInterval(() => {
+      chrome.storage.local.get(['scheduleSettings', 'isRunning'], function(result) {
+        if (result.scheduleSettings) {
+          updateScheduleStatus(result.scheduleSettings || {}, result.isRunning || false);
+        }
+      });
+    }, 1000);
+  }
+  
   // 更新计时器UI
   function updateTimersUI() {
     loadTimers();
+    loadSchedule(); // 同时更新定时状态
   }
 });
 

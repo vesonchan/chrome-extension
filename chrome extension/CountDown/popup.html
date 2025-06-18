@@ -20,21 +20,29 @@
       </div>
       
       <div class="schedule-controls">
-        <h2>定时控制</h2>
+        <h2>定时控制 <small style="color: #666; font-size: 10px;">（支持秒级精度）</small></h2>
+        <div id="schedule-status" class="schedule-status">
+          <!-- 定时状态将在这里显示 -->
+        </div>
         <div class="schedule-row">
           <label for="start-time">开始时间：</label>
-          <input type="time" id="start-time">
+          <input type="time" id="start-time" step="1">
         </div>
         <div class="schedule-row">
           <label for="stop-time">停止时间：</label>
-          <input type="time" id="stop-time">
+          <input type="time" id="stop-time" step="1">
         </div>
         <button id="save-schedule-btn">保存定时设置</button>
+        <button id="test-schedule-btn" style="margin-top: 5px; background-color: #9c27b0;">🧪 测试定时检查</button>
       </div>
       
       <div class="timer-controls">
         <button id="start-all-btn">开始所有倒计时</button>
         <button id="stop-all-btn">停止所有倒计时</button>
+      </div>
+      
+      <div class="footer">
+        <button id="settings-btn" class="settings-btn">⚙️ 通知设置</button>
       </div>
     </div>
   </div>

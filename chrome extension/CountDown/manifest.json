@@ -23,6 +23,16 @@
   "permissions": [
     "storage",
     "alarms",
-    "notifications"
-  ]
+    "notifications",
+    "activeTab",
+    "tabs"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "options_page": "options.html"
 } 

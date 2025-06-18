@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>倒计时器设置</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      background: white;
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    h1 {
+      color: #333;
+      margin-bottom: 24px;
+    }
+    
+    .section {
+      margin-bottom: 24px;
+      padding: 16px;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+    }
+    
+    .section h2 {
+      margin-top: 0;
+      color: #555;
+    }
+    
+    .status {
+      padding: 12px;
+      border-radius: 4px;
+      margin: 12px 0;
+    }
+    
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .status.warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 8px 4px 8px 0;
+    }
+    
+    button:hover {
+      background: #0056b3;
+    }
+    
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+    
+    .instructions {
+      background: #e7f3ff;
+      padding: 16px;
+      border-radius: 4px;
+      margin: 16px 0;
+    }
+    
+    .instructions h3 {
+      margin-top: 0;
+      color: #0066cc;
+    }
+    
+    .instructions ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+    
+    .instructions li {
+      margin: 8px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🕐 倒计时器扩展设置</h1>
+    
+    <div class="section">
+      <h2>通知权限状态</h2>
+      <div id="notification-status" class="status">检查中...</div>
+      <button id="test-notification">测试通知</button>
+      <button id="check-permissions">重新检查权限</button>
+    </div>
+    
+    <div class="section">
+      <h2>🍎 Mac用户特别说明</h2>
+      <div class="instructions">
+        <h3>如果通知无法正常显示，请按以下步骤操作：</h3>
+        <ol>
+          <li><strong>检查Chrome浏览器通知权限：</strong>
+            <br>进入Chrome设置 → 隐私和安全 → 网站设置 → 通知 → 确保允许网站发送通知
+          </li>
+          <li><strong>检查macOS系统通知权限：</strong>
+            <br>系统偏好设置 → 通知与专注模式 → Google Chrome → 确保允许通知
+          </li>
+          <li><strong>检查勿扰模式：</strong>
+            <br>确保Mac没有开启勿扰模式，或者将Chrome添加到允许列表
+          </li>
+          <li><strong>重启浏览器：</strong>
+            <br>完全关闭Chrome浏览器并重新打开
+          </li>
+        </ol>
+      </div>
+    </div>
+    
+    <div class="section">
+      <h2>故障排除</h2>
+      <button id="clear-storage">清除扩展数据</button>
+      <button id="reload-extension">重新加载扩展</button>
+      <div id="debug-info" style="margin-top: 12px; font-family: monospace; font-size: 12px; color: #666;"></div>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html> 
