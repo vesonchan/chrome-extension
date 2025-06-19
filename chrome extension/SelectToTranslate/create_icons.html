@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>生成翻译插件图标</title>
+</head>
+<body>
+    <canvas id="canvas16" width="16" height="16"></canvas>
+    <canvas id="canvas48" width="48" height="48"></canvas>
+    <canvas id="canvas128" width="128" height="128"></canvas>
+    
+    <script>
+        function createIcon(canvasId, size) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            
+            // 背景
+            ctx.fillStyle = '#4285f4';
+            ctx.fillRect(0, 0, size, size);
+            
+            // 文字 "译"
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `bold ${Math.floor(size * 0.6)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('译', size/2, size/2);
+            
+            // 下载
+            const link = document.createElement('a');
+            link.download = `icon${size}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+        
+        // 生成所有图标
+        window.onload = function() {
+            setTimeout(() => createIcon('canvas16', 16), 100);
+            setTimeout(() => createIcon('canvas48', 48), 200);
+            setTimeout(() => createIcon('canvas128', 128), 300);
+        };
+    </script>
+</body>
+</html> 

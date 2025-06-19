@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vimium Clone</title>
+  <style>
+    body {
+      width: 300px;
+      min-height: 400px;
+      margin: 0;
+      padding: 16px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f8f9fa;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    
+    .header h1 {
+      margin: 0;
+      font-size: 18px;
+      color: #1a73e8;
+      font-weight: 600;
+    }
+    
+    .status {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 16px;
+    }
+    
+    .status-text {
+      font-weight: 500;
+      color: #333;
+    }
+    
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 24px;
+      background-color: #ddd;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    
+    .toggle-switch.active {
+      background-color: #1a73e8;
+    }
+    
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background-color: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .toggle-switch.active::after {
+      transform: translateX(26px);
+    }
+    
+    .shortcuts {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .shortcuts h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .shortcut-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .shortcut-item:last-child {
+      border-bottom: none;
+    }
+    
+    .shortcut-key {
+      background-color: #f1f3f4;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .shortcut-desc {
+      font-size: 13px;
+      color: #666;
+      flex: 1;
+      margin-left: 8px;
+    }
+    
+    .settings {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 16px;
+    }
+    
+    .settings h3 {
+      margin: 0 0 12px 0;
+      font-size: 14px;
+      color: #333;
+      font-weight: 600;
+    }
+    
+    .setting-item {
+      margin-bottom: 12px;
+    }
+    
+    .setting-item label {
+      display: block;
+      font-size: 13px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .setting-item input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 13px;
+    }
+    
+    .setting-item input:focus {
+      outline: none;
+      border-color: #1a73e8;
+      box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.2);
+    }
+    
+    .footer {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 12px;
+      color: #999;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Vimium Clone</h1>
+  </div>
+  
+  <div class="status">
+    <span class="status-text">插件状态</span>
+    <div class="toggle-switch" id="toggleSwitch"></div>
+  </div>
+  
+  <div class="shortcuts">
+    <h3>快捷键</h3>
+    <div class="shortcut-item">
+      <span class="shortcut-key">j</span>
+      <span class="shortcut-desc">向下滚动</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">k</span>
+      <span class="shortcut-desc">向上滚动</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">h</span>
+      <span class="shortcut-desc">向左滚动</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">l</span>
+      <span class="shortcut-desc">向右滚动</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">f</span>
+      <span class="shortcut-desc">显示链接提示</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">gg</span>
+      <span class="shortcut-desc">滚动到顶部</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">G</span>
+      <span class="shortcut-desc">滚动到底部</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">r</span>
+      <span class="shortcut-desc">刷新页面</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">yY</span>
+      <span class="shortcut-desc">复制URL</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">t</span>
+      <span class="shortcut-desc">新建标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">x</span>
+      <span class="shortcut-desc">关闭标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">X</span>
+      <span class="shortcut-desc">恢复标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">T</span>
+      <span class="shortcut-desc">搜索标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">a</span>
+      <span class="shortcut-desc">浏览器后退</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">s</span>
+      <span class="shortcut-desc">浏览器前进</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">q</span>
+      <span class="shortcut-desc">前一个标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">w</span>
+      <span class="shortcut-desc">后一个标签页</span>
+    </div>
+    <div class="shortcut-item">
+      <span class="shortcut-key">e</span>
+      <span class="shortcut-desc">最后一个标签页</span>
+    </div>
+  </div>
+  
+  <div class="settings">
+    <h3>设置</h3>
+    <div class="setting-item">
+      <label for="scrollStep">滚动步长 (像素)</label>
+      <input type="number" id="scrollStep" min="10" max="200" value="60">
+    </div>
+  </div>
+  
+  <div class="footer">
+    <p>按 ESC 键隐藏链接提示</p>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html> 

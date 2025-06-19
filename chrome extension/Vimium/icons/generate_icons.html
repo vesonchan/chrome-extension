@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>生成Vimium图标</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .icon-preview {
+      display: flex;
+      gap: 20px;
+      margin: 20px 0;
+      align-items: center;
+    }
+    .icon-size {
+      text-align: center;
+    }
+    canvas {
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    button {
+      background: #1a73e8;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover {
+      background: #1557b0;
+    }
+    .instructions {
+      background: #e8f0fe;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Vimium Clone 图标生成器</h1>
+    
+    <div class="instructions">
+      <h3>使用说明：</h3>
+      <ol>
+        <li>点击下面的"生成图标"按钮</li>
+        <li>右键点击各个尺寸的图标</li>
+        <li>选择"图片另存为"</li>
+        <li>分别保存为 icon16.png, icon32.png, icon48.png, icon128.png</li>
+      </ol>
+    </div>
+    
+    <button onclick="generateIcons()">生成图标</button>
+    
+    <div class="icon-preview" id="iconPreview">
+      <!-- 图标将在这里显示 -->
+    </div>
+  </div>
+
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      const scale = size / 128;
+      
+      // 清空画布
+      ctx.clearRect(0, 0, size, size);
+      
+      // 创建渐变背景
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#1a73e8');
+      gradient.addColorStop(1, '#0066cc');
+      
+      // 绘制背景圆形
+      ctx.beginPath();
+      ctx.arc(size/2, size/2, 58 * scale, 0, 2 * Math.PI);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2 * scale;
+      ctx.stroke();
+      
+      // 绘制键盘背景
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+      ctx.beginPath();
+      ctx.roundRect(24 * scale, 44 * scale, 80 * scale, 48 * scale, 6 * scale);
+      ctx.fill();
+      
+      // 绘制键盘顶部条
+      ctx.fillStyle = '#1a73e8';
+      ctx.beginPath();
+      ctx.roundRect(28 * scale, 48 * scale, 72 * scale, 8 * scale, 2 * scale);
+      ctx.fill();
+      
+      // 绘制按键
+      const keys = [
+        [30, 60, 8, 8], [42, 60, 8, 8], [54, 60, 8, 8], 
+        [66, 60, 8, 8], [78, 60, 8, 8], [90, 60, 8, 8],
+        [30, 72, 8, 8], [42, 72, 8, 8], [54, 72, 20, 8], 
+        [78, 72, 8, 8], [90, 72, 8, 8]
+      ];
+      
+      keys.forEach(([x, y, w, h]) => {
+        ctx.beginPath();
+        ctx.roundRect(x * scale, y * scale, w * scale, h * scale, 1 * scale);
+        ctx.fill();
+      });
+      
+      // 绘制VIM文字
+      ctx.fillStyle = '#fff';
+      ctx.font = `bold ${12 * scale}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.fillText('VIM', size/2, 104 * scale);
+    }
+    
+    function generateIcons() {
+      const sizes = [16, 32, 48, 128];
+      const preview = document.getElementById('iconPreview');
+      preview.innerHTML = '';
+      
+      sizes.forEach(size => {
+        const container = document.createElement('div');
+        container.className = 'icon-size';
+        
+        const canvas = document.createElement('canvas');
+        canvas.width = size;
+        canvas.height = size;
+        
+        const label = document.createElement('div');
+        label.textContent = `${size}x${size}`;
+        label.style.marginTop = '10px';
+        label.style.fontSize = '14px';
+        label.style.fontWeight = 'bold';
+        
+        drawIcon(canvas, size);
+        
+        container.appendChild(canvas);
+        container.appendChild(label);
+        preview.appendChild(container);
+      });
+    }
+    
+    // 添加roundRect支持（如果浏览器不支持）
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.lineTo(x + width - radius, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.lineTo(x + width, y + height - radius);
+        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.lineTo(x + radius, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.lineTo(x, y + radius);
+        this.quadraticCurveTo(x, y, x + radius, y);
+        this.closePath();
+      };
+    }
+    
+    // 页面加载时自动生成图标
+    window.onload = function() {
+      generateIcons();
+    };
+  </script>
+</body>
+</html> 

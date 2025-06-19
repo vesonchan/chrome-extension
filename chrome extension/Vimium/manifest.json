@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Vimium Clone",
+  "version": "1.2.0",
+  "description": "Vim风格的浏览器键盘导航插件",
+  
+  "permissions": [
+    "activeTab",
+    "tabs",
+    "storage",
+    "bookmarks",
+    "history"
+  ],
+  
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["vimium.css"],
+      "run_at": "document_end"
+    }
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Vimium Clone",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "commands": {
+    "toggle-vimium": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+F"
+      },
+      "description": "切换Vimium开关"
+    },
+    "show-link-hints": {
+      "suggested_key": {
+        "default": "Alt+F"
+      },
+      "description": "显示链接提示"
+    }
+  },
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png", 
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

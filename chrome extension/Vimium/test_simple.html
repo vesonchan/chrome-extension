@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vimium简单测试</title>
+</head>
+<body>
+    <h1>Vimium简单测试页面</h1>
+    <p>按下 t 键测试新建标签页</p>
+    <button onclick="testDirectMessage()">直接测试消息</button>
+    <button onclick="testVimiumInstance()">测试Vimium实例</button>
+    
+    <div id="output"></div>
+    
+    <script>
+        function log(message) {
+            console.log(message);
+            const output = document.getElementById('output');
+            output.innerHTML += '<div>' + message + '</div>';
+        }
+        
+        function testDirectMessage() {
+            log('=== 直接测试消息传递 ===');
+            
+            if (typeof chrome === 'undefined') {
+                log('❌ Chrome API不可用');
+                return;
+            }
+            
+            if (!chrome.runtime) {
+                log('❌ chrome.runtime不可用');
+                return;
+            }
+            
+            log('✅ 开始发送消息...');
+            
+            chrome.runtime.sendMessage({ action: 'newTab' }, (response) => {
+                log('收到响应: ' + JSON.stringify(response));
+                
+                if (chrome.runtime.lastError) {
+                    log('❌ 错误: ' + chrome.runtime.lastError.message);
+                } else if (response && response.success) {
+                    log('✅ 成功: 标签页ID ' + response.tabId);
+                } else {
+                    log('❌ 失败: ' + (response ? response.error : '无响应'));
+                }
+            });
+        }
+        
+        function testVimiumInstance() {
+            log('=== 测试Vimium实例 ===');
+            
+            if (typeof vimium !== 'undefined') {
+                log('✅ Vimium实例存在');
+                log('状态: enabled=' + vimium.enabled);
+                
+                // 直接调用newTab方法
+                try {
+                    vimium.newTab();
+                    log('✅ 直接调用newTab成功');
+                } catch (error) {
+                    log('❌ 直接调用newTab失败: ' + error.message);
+                }
+            } else {
+                log('❌ Vimium实例不存在');
+            }
+        }
+        
+        // 页面加载完成后自动运行测试
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                log('页面加载完成，开始自动测试...');
+                testVimiumInstance();
+            }, 1000);
+        });
+        
+        // 监听键盘事件
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 't') {
+                log('检测到 t 键按下');
+                testDirectMessage();
+            }
+        });
+    </script>
+</body>
+</html> 

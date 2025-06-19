@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "划词翻译助手",
+  "version": "1.0.0",
+  "description": "支持多种翻译模型的划词翻译工具",
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://translate.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.x.ai/*",
+    "https://api.mymemory.translated.net/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [{
+    "matches": ["<all_urls>"],
+    "js": ["content.js"],
+    "css": ["styles.css"]
+  }],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "划词翻译设置"
+  }
+}
