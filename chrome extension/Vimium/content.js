@@ -70,6 +70,19 @@ class VimiumClone {
   handleKeyDown(e) {
     console.log('Vimium: 按键事件 - enabled:', this.enabled, 'key:', e.key, 'target:', e.target.tagName);
     
+    // 如果按下了修饰键（Command、Ctrl、Alt），不处理快捷键，让浏览器原生功能生效
+    if (e.metaKey || e.ctrlKey || e.altKey) {
+      return;
+    }
+    
+    // 对于Shift组合键，只允许特定的Vimium快捷键
+    if (e.shiftKey) {
+      const allowedShiftKeys = ['g', 't', 'x', 'y'];
+      if (!allowedShiftKeys.includes(e.key.toLowerCase())) {
+        return;
+      }
+    }
+    
     // 如果链接提示正在显示，处理提示选择
     if (this.linkHintsVisible) {
       this.handleHintKey(e);
