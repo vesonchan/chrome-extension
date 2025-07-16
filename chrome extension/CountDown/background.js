@@ -202,33 +202,34 @@ function showTimerCompletedNotification(minutes) {
       type: 'basic',
       iconUrl: 'images/icon128.png',
       title: '⏰ 计时器完成',
-      message: `${minutes}分钟的倒计时已完成！点击查看`,
+      message: `${minutes}分钟的倒计时已完成！`,
       priority: 2,
-      requireInteraction: true, // 要求用户交互才能关闭
+      requireInteraction: false, // 允许自动关闭
       silent: false // 确保有声音提示
     }, function(createdNotificationId) {
       if (chrome.runtime.lastError) {
         console.error('创建通知失败:', chrome.runtime.lastError.message);
-        // 降级为浏览器原生alert（作为备选方案）
-        try {
-          // 发送消息给活动标签页显示alert
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            if (tabs.length > 0) {
-              chrome.tabs.sendMessage(tabs[0].id, {
-                action: 'showAlert',
-                message: `⏰ ${minutes}分钟的倒计时已完成！`
-              });
-            }
-          });
-        } catch (e) {
-          console.error('备选通知方案也失败:', e);
-        }
+        // 降级为自定义通知方案，避免使用alert
+        console.log('使用控制台日志作为备选通知方案');
+        window.console.log(`⏰ 倒计时完成提醒: ${minutes}分钟的倒计时已完成！`);
       } else {
         console.log('通知创建成功:', createdNotificationId);
+        
+        // 5秒后自动清除通知
+        setTimeout(() => {
+          chrome.notifications.clear(notificationId, function(wasCleared) {
+            if (wasCleared) {
+              console.log('通知已自动清除:', notificationId);
+            }
+          });
+        }, 3000);
       }
     });
   } catch (error) {
     console.error('通知创建异常:', error);
+    // 异常情况下也不使用alert，避免阻塞用户
+    console.log('使用控制台日志作为备选通知方案');
+    window.console.log(`⏰ 倒计时完成提醒: ${minutes}分钟的倒计时已完成！`);
   }
 }
 
@@ -364,12 +365,21 @@ function checkSchedule() {
         
         // 发送通知告知用户已自动开始
         if (chrome.notifications) {
-          chrome.notifications.create(`auto-start-${Date.now()}`, {
+          const startNotificationId = `auto-start-${Date.now()}`;
+          chrome.notifications.create(startNotificationId, {
             type: 'basic',
             iconUrl: 'images/icon128.png',
             title: '⏰ 定时启动',
             message: `倒计时已按计划在 ${scheduleSettings.startTime} 自动开始！`,
-            priority: 1
+            priority: 1,
+            requireInteraction: false
+          }, function(createdId) {
+            if (createdId) {
+              // 3秒后自动清除通知
+              setTimeout(() => {
+                chrome.notifications.clear(startNotificationId);
+              }, 3000);
+            }
           });
         }
       } else {
@@ -384,12 +394,21 @@ function checkSchedule() {
       
       // 发送通知告知用户已自动停止
       if (chrome.notifications) {
-        chrome.notifications.create(`auto-stop-${Date.now()}`, {
+        const stopNotificationId = `auto-stop-${Date.now()}`;
+        chrome.notifications.create(stopNotificationId, {
           type: 'basic',
           iconUrl: 'images/icon128.png',
           title: '⏹️ 定时停止',
           message: `倒计时已按计划在 ${scheduleSettings.stopTime} 自动停止！`,
-          priority: 1
+          priority: 1,
+          requireInteraction: false
+        }, function(createdId) {
+          if (createdId) {
+            // 3秒后自动清除通知
+            setTimeout(() => {
+              chrome.notifications.clear(stopNotificationId);
+            }, 3000);
+          }
         });
       }
     }

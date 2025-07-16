@@ -1,8 +1,8 @@
 // 内容脚本 - 处理来自后台脚本的消息
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.action === 'showAlert') {
-    // 显示浏览器原生alert作为通知的备选方案
-    alert(message.message);
+    // 不再使用alert，改为在控制台记录日志
+    window.console.log('倒计时完成通知:', message.message);
     sendResponse({success: true});
   }
 });

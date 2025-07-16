@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
         title: '🧪 测试通知',
         message: '如果您看到这条消息，说明通知功能正常工作！',
         priority: 2,
-        requireInteraction: true,
+        requireInteraction: false,
         silent: false
       }, function(createdId) {
         testNotificationBtn.disabled = false;
@@ -80,7 +80,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
           console.log('测试通知发送成功:', createdId);
           
-          // 3秒后自动清除测试通知
+          // 5秒后自动清除测试通知
           setTimeout(() => {
             chrome.notifications.clear(notificationId);
           }, 3000);
