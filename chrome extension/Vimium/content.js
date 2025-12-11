@@ -70,7 +70,15 @@ class VimiumClone {
   handleKeyDown(e) {
     console.log('Vimium: 按键事件 - enabled:', this.enabled, 'key:', e.key, 'target:', e.target.tagName);
     
-    // 如果按下了修饰键（Command、Ctrl、Alt），不处理快捷键，让浏览器原生功能生效
+    // Ctrl+Shift+F 兜底切换开关（避免浏览器命令未生效）
+    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'f') {
+      e.preventDefault();
+      this.enabled = !this.enabled;
+      this.showMessage(this.enabled ? 'Vimium已启用' : 'Vimium已禁用');
+      return;
+    }
+    
+    // 如果按下了修饰键（Command、Ctrl、Alt），不处理其它快捷键，让浏览器原生功能生效
     if (e.metaKey || e.ctrlKey || e.altKey) {
       return;
     }
@@ -92,7 +100,7 @@ class VimiumClone {
     const key = e.key.toLowerCase();
     
     // 处理长按滚动
-    if (['j', 'k', 'h', 'l'].includes(key)) {
+    if (['d', 'f', 'h', 'l'].includes(key)) {
       this.pressedKeys.add(key);
       if (!this.keyRepeatTimer) {
         this.startKeyRepeat(key);
@@ -101,11 +109,11 @@ class VimiumClone {
     
     // 处理普通快捷键
     switch(key) {
-      case 'j':
+      case 'd':
         e.preventDefault();
         this.scrollDown();
         break;
-      case 'k':
+      case 'f':
         e.preventDefault();
         this.scrollUp();
         break;
@@ -203,7 +211,7 @@ class VimiumClone {
     const key = e.key.toLowerCase();
     
     // 停止长按滚动
-    if (['j', 'k', 'h', 'l'].includes(key)) {
+    if (['d', 'f', 'h', 'l'].includes(key)) {
       this.pressedKeys.delete(key);
       if (this.pressedKeys.size === 0) {
         this.stopKeyRepeat();
@@ -273,10 +281,10 @@ class VimiumClone {
           // 长按时使用小步长快速滚动，不使用smooth
           const smallStep = Math.ceil(this.scrollStep / 3);
           switch(key) {
-            case 'j':
+            case 'd':
               window.scrollBy(0, smallStep);
               break;
-            case 'k':
+            case 'f':
               window.scrollBy(0, -smallStep);
               break;
             case 'h':
